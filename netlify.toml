@@ -1,0 +1,7 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# GitHub Pages ne sait pas exécuter de code serveur : ce fichier permet à
+# Netlify de servir le même site statique tout en ajoutant les fonctions
+# nécessaires au paiement (voir README).

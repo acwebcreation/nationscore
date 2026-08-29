@@ -1,0 +1,9 @@
+{
+  "name": "nationscore-functions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Fonctions serverless (paiement Stripe) pour NationScore",
+  "dependencies": {
+    "stripe": "^16.0.0"
+  }
+}

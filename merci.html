@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Merci — NationScore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="index.html">Nation<span>Score</span></a>
+  <nav><a href="index.html">Classement</a></nav>
+</header>
+
+<div class="page" style="text-align:center;">
+  <div class="hero__eyebrow" id="status-eyebrow">Vérification du paiement…</div>
+  <h1 id="thanks-title">Un instant…</h1>
+  <p id="thanks-detail">On confirme ton paiement auprès de Stripe.</p>
+
+  <a class="hero__cta" href="index.html">Voir le classement en direct →</a>
+
+  <div style="margin-top:28px;">
+    <button class="toggle" id="share-btn" style="display:none;">Partager mon score</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <a href="guide.html">Guide</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cgv.html">CGV</a>
+  <a href="mentions-legales.html">Mentions légales</a>
+  <a href="confidentialite.html">Confidentialité</a>
+</footer>
+
+<script src="js/data.js"></script>
+<script>
+  const sessionId = new URLSearchParams(window.location.search).get("session_id");
+  const titleEl = document.getElementById("thanks-title");
+  const detailEl = document.getElementById("thanks-detail");
+  const eyebrowEl = document.getElementById("status-eyebrow");
+  const shareBtn = document.getElementById("share-btn");
+
+  async function loadSession() {
+    if (!sessionId) {
+      eyebrowEl.textContent = "Aucun paiement détecté";
+      titleEl.textContent = "Rien à afficher ici";
+      detailEl.textContent = "Reviens depuis la page « Soutenir un pays » pour jouer.";
+      return;
+    }
+
+    try {
+      const res = await fetch(`/.netlify/functions/get-session?session_id=${sessionId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      eyebrowEl.textContent = "Score enregistré";
+      const flag = flagEmoji(data.countryCode);
+      titleEl.textContent = `Merci, ${flag} ${data.countryName} te dit bravo !`;
+      detailEl.textContent = data.pseudo
+        ? `${data.pseudo}, tu viens d'ajouter ${data.amount} € au score de ${data.countryName}. Reviens voir s'il tient sa place.`
+        : `Tu viens d'ajouter ${data.amount} € au score de ${data.countryName}. Reviens voir s'il tient sa place.`;
+
+      shareBtn.style.display = "inline-block";
+      shareBtn.addEventListener("click", () => {
+        const who = data.pseudo ? `${data.pseudo} vient de faire monter` : "Je viens de faire monter";
+        const text = `${who} ${flag} ${data.countryName} sur NationScore. À toi de jouer 👉`;
+        if (navigator.share) {
+          navigator.share({ text, url: window.location.origin });
+        } else {
+          navigator.clipboard.writeText(`${text} ${window.location.origin}`);
+          alert("Lien copié dans le presse-papiers !");
+        }
+      });
+    } catch (err) {
+      eyebrowEl.textContent = "Paiement non confirmé";
+      titleEl.textContent = "On n'a pas pu vérifier ce paiement";
+      detailEl.textContent = "Si le montant a bien été débité, contacte-nous.";
+    }
+  }
+
+  loadSession();
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Soutenir un pays — NationScore</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="index.html">Nation<span>Score</span></a>
+  <nav>
+    <a href="index.html">Classement</a>
+    <a href="mentions-legales.html">Mentions légales</a>
+  </nav>
+</header>
+
+<div class="page">
+  <div class="wrap" style="text-align:center; margin-bottom:32px;">
+    <h1>Fais monter ton pays</h1>
+    <p>Choisis un pays, un montant, et regarde-le grimper en direct.</p>
+  </div>
+
+  <form class="form-card" id="support-form">
+    <div class="field">
+      <label for="country">Pays à soutenir</label>
+      <select id="country" name="country" required>
+        <!-- Rempli dynamiquement depuis data.js, ou statique si liste figée -->
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="pseudo">Pseudo (optionnel)</label>
+      <input type="text" id="pseudo" name="pseudo" maxlength="20" placeholder="Ex. Julien93" />
+    </div>
+
+    <div class="field">
+      <label>Montant</label>
+      <div class="amount-group" id="amount-group">
+        <div class="amount-chip is-selected" data-amount="5">5 €</div>
+        <div class="amount-chip" data-amount="10">10 €</div>
+        <div class="amount-chip" data-amount="20">20 €</div>
+        <div class="amount-chip" data-amount="50">50 €</div>
+      </div>
+      <input type="hidden" id="amount" name="amount" value="5" />
+    </div>
+
+    <button type="submit" class="submit-btn">Soutenir — 5 €</button>
+
+    <p class="disclaimer">
+      Ce paiement est un acte symbolique et ludique. Il ne s'agit ni d'un don,
+      ni d'un investissement : la somme n'est reversée à aucun pays,
+      gouvernement ou association. Aucun remboursement possible.
+      Paiement sécurisé — traitement à intégrer (Stripe). Seul le pays, le
+      montant et ton pseudo (si renseigné) apparaissent publiquement — jamais
+      ton nom réel ni ton email.
+    </p>
+  </form>
+</div>
+
+<footer class="site-footer">
+  <a href="guide.html">Guide</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cgv.html">CGV</a>
+  <a href="mentions-legales.html">Mentions légales</a>
+  <a href="confidentialite.html">Confidentialité</a>
+</footer>
+
+<script src="js/data.js"></script>
+<script>
+  // Remplit le menu déroulant des pays depuis data.js
+  const select = document.getElementById("country");
+  COUNTRIES.forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.code;
+    opt.dataset.name = c.name;
+    opt.textContent = `${flagEmoji(c.code)} ${c.name}`;
+    select.appendChild(opt);
+  });
+
+  // Sélection du montant
+  const amountInput = document.getElementById("amount");
+  const submitBtn = document.querySelector(".submit-btn");
+  document.querySelectorAll(".amount-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".amount-chip").forEach((c) => c.classList.remove("is-selected"));
+      chip.classList.add("is-selected");
+      amountInput.value = chip.dataset.amount;
+      submitBtn.textContent = `Soutenir — ${chip.dataset.amount} €`;
+    });
+  });
+
+  // Crée une session Stripe Checkout côté serveur, puis redirige l'utilisateur
+  // vers la page de paiement hébergée par Stripe (carte, Apple/Google Pay,
+  // Bizum en Espagne — choisis automatiquement par Stripe).
+  document.getElementById("support-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const countryCode = select.value;
+    const countryName = select.selectedOptions[0].dataset.name;
+    const amount = amountInput.value;
+    const pseudo = document.getElementById("pseudo").value.trim();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Redirection vers le paiement…";
+
+    try {
+      const res = await fetch("/.netlify/functions/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ countryCode, countryName, amount, pseudo }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || "Erreur inconnue");
+      }
+    } catch (err) {
+      alert("Le paiement n'a pas pu démarrer. Réessaie dans un instant.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = `Soutenir — ${amount} €`;
+    }
+  });
+</script>
+</body>
+</html>

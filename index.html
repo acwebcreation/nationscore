@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NationScore — Quel patriote es-tu ?</title>
+<meta name="description" content="Soutiens ton pays, fais-le grimper au classement. Un jeu de patriotisme, pas un don." />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="index.html">Nation<span>Score</span></a>
+  <nav>
+    <a href="soutenir.html">Soutenir un pays</a>
+    <a href="guide.html">Guide</a>
+    <a href="faq.html">FAQ</a>
+  </nav>
+</header>
+
+<div class="ticker">
+  <div class="ticker__track" id="ticker-track"></div>
+</div>
+
+<section class="hero">
+  <div class="hero__eyebrow">Le classement du patriotisme</div>
+  <h1>Quel <em>patriote</em> es-tu ?</h1>
+  <p>Choisis un pays — pas forcément le tien — et fais-le grimper au classement. 5&nbsp;€ minimum. Aucun don, aucun reversement : juste toi contre les autres.</p>
+  <a class="hero__cta" href="soutenir.html">Faire monter mon pays →</a>
+</section>
+
+<div class="wrap">
+  <div class="toggle-group">
+    <button id="btn-pays" class="toggle toggle--active">Par pays</button>
+    <button id="btn-continent" class="toggle">Par continent</button>
+  </div>
+
+  <ul class="leaderboard" id="leaderboard"></ul>
+</div>
+
+<footer class="site-footer">
+  <a href="guide.html">Guide</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cgv.html">CGV</a>
+  <a href="mentions-legales.html">Mentions légales</a>
+  <a href="confidentialite.html">Confidentialité</a>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
